@@ -1,10 +1,10 @@
-# unknownr
+# windows_com
 
-Ruby-FFI (x86) bindings to essential COM-related Windows APIs
+Ruby FFI (x86) bindings to essential COM related Windows APIs
 
 ## Install
 
-gem install unknownr
+gem install windows_com
 
 ## Use
 
