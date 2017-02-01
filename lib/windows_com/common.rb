@@ -238,7 +238,7 @@ module WindowsCOM
 				attr_reader :refc
 
 				def QueryInterface(iid, ppv)
-					unless IUnknown::IID == iid || self.class::IID == iid
+					unless self.class::IID == iid || IUnknown::IID == iid
 						STDERR.puts "#{self}.#{__method__} called with unsupported interface id (IID: #{iid})" if $DEBUG
 
 						ppv.write_pointer(0)
