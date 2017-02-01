@@ -33,6 +33,26 @@ class WindowsCOMTest < Minitest::Test
     refute propkey2 == propkey3
   end
 
+  def test_FFIStructAnonymousAccess
+    v = VARIANT.new
+
+    # direct member access
+    assert v[:decVal].class == DECIMAL
+
+    # level one _ member access
+    v[:vt] = VT_BOOL
+    assert v[:vt] == VT_BOOL
+
+    # level two _ member access
+    v[:intVal] = 42
+    assert v[:intVal] == 42
+
+    # nonexisting field access
+    assert_raises(ArgumentError) {
+      v[:foo]
+    }
+  end
+
   IFoo = COMInterface[nil,
     '00000000-0000-0000-0000-000000000001',
 

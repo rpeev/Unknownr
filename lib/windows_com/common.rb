@@ -65,6 +65,28 @@ module WindowsCOM
 		end
 	end
 
+	module FFIStructAnonymousAccess
+		def [](k)
+			if members.include?(k)
+				super
+			elsif self[:_].members.include?(k)
+				self[:_][k]
+			else
+				self[:_][:_][k]
+			end
+		end
+
+		def []=(k, v)
+			if members.include?(k)
+				super
+			elsif self[:_].members.include?(k)
+				self[:_][k] = v
+			else
+				self[:_][:_][k] = v
+			end
+		end
+	end
+
 	class GUID < FFI::Struct
 		include FFIStructMemoryEquality
 

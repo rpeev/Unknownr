@@ -31,6 +31,8 @@ module WindowsCOM
 	attach_function :CoTaskMemFree, [:pointer], :void
 
 	class LARGE_INTEGER < FFI::Union
+		include FFIStructAnonymousAccess
+
 		layout \
 			:_, Class.new(FFI::Struct) {
 				layout \
@@ -42,6 +44,8 @@ module WindowsCOM
 	end
 
 	class ULARGE_INTEGER < FFI::Union
+		include FFIStructAnonymousAccess
+
 		layout \
 			:_, Class.new(FFI::Struct) {
 				layout \
@@ -134,6 +138,8 @@ module WindowsCOM
 	VT_TYPEMASK = 0xff
 
 	class VARIANT < FFI::Union
+		include FFIStructAnonymousAccess
+
 		layout \
 			:_, Class.new(FFI::Struct) {
 				layout \
@@ -224,6 +230,8 @@ module WindowsCOM
 	end
 
 	class PROPVARIANT < FFI::Union
+		include FFIStructAnonymousAccess
+
 		layout \
 			:_, Class.new(FFI::Struct) {
 				layout \
