@@ -1,6 +1,7 @@
 if __FILE__ == $0
 	require_relative 'common'
 	require_relative 'libc'
+	require_relative 'shlwapi'
 	require_relative 'ole'
 end
 
