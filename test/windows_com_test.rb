@@ -20,6 +20,8 @@ class WindowsCOMTest < Minitest::Test
     refute guid1 != guid2
     assert guid2 != guid3
     refute guid2 == guid3
+
+    assert IUnknown::IID.to_s == '00000000-0000-0000-C000-000000000046'
   end
 
   def test_PROPERTYKEY

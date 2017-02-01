@@ -3,6 +3,7 @@ require 'ffi'
 WINDOWS_COM_VERSION = '1.0.0'
 
 WINDOWS_COM_OLE_INIT = true unless defined?(WINDOWS_COM_OLE_INIT)
+WINDOWS_COM_TRACE_CALLBACK_REFCOUNT = false unless defined?(WINDOWS_COM_TRACE_CALLBACK_REFCOUNT)
 
 module WindowsCOM
 	extend FFI::Library
@@ -124,6 +125,13 @@ module WindowsCOM
 
 			guid
 		end
+
+		def to_s
+			format '%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X',
+				self[:Data1], self[:Data2], self[:Data3],
+				self[:Data4][0], self[:Data4][1],
+				self[:Data4][2], self[:Data4][3], self[:Data4][4], self[:Data4][5], self[:Data4][6], self[:Data4][7]
+		end
 	end
 
 	class COMVptr_ < FFI::Struct
@@ -134,7 +142,7 @@ module WindowsCOM
 	module COMVtbl_
 		def self.[](parent_vtbl, spec)
 			spec.each { |name, sig|
-				sig[0].unshift(:pointer) # prepend *this* pointer
+				sig[0].unshift(:pointer) # prepend *this* pointer to FFI func signature
 			}
 
 			Class.new(FFI::Struct) {
@@ -203,6 +211,72 @@ module WindowsCOM
 						super(ppv.read_pointer)
 					}
 				end
+			}
+		end
+	end
+
+	module COMCallback
+		def self.[](iface)
+			Class.new(iface) {
+				def initialize
+					@vtbl = self.class::Vtbl.new
+					@vtbl.members.each { |name|
+						@vtbl[name] = instance_variable_set("@__ffi_func__#{name}",
+							FFI::Function.new(*@vtbl.class::Spec[name].reverse, convention: :stdcall) { |*args|
+								__send__(name, *args[1..-1]) # remove *this* pointer from Ruby meth call
+							}
+						)
+					}
+
+					@vptr = COMVptr_.new
+					@vptr[:lpVtbl] = @vtbl
+
+					@refc = 0
+					AddRef()
+				end
+
+				attr_reader :refc
+
+				def QueryInterface(iid, ppv)
+					unless IUnknown::IID == iid || self.class::IID == iid
+						STDERR.puts "#{self}.#{__method__} called with unsupported interface id (IID: #{iid})" if $DEBUG
+
+						ppv.write_pointer(0)
+						return E_NOINTERFACE
+					end
+
+					ppv.write_pointer(@vptr)
+					AddRef()
+					S_OK
+				end
+
+				def AddRef
+					@refc += 1
+
+					STDERR.puts "#{self}.#{__method__} (@refc: #{@refc})" if
+						$DEBUG || WINDOWS_COM_TRACE_CALLBACK_REFCOUNT
+				end
+
+				def Release
+					@refc -= 1
+
+					STDERR.puts "#{self}.#{__method__} (@refc: #{@refc})" if
+						$DEBUG || WINDOWS_COM_TRACE_CALLBACK_REFCOUNT
+
+					if @refc == 0
+						@vtbl.pointer.free
+						@vptr.pointer.free
+
+						STDERR.puts "#{self} refcount is 0, #{@vtbl} and #{@vptr} freed" if
+							$DEBUG || WINDOWS_COM_TRACE_CALLBACK_REFCOUNT
+					end
+				end
+
+				(self::Vtbl.members - IUnknown::Vtbl.members).each { |name|
+					define_method(name) { |*args|
+						E_NOTIMPL
+					}
+				}
 			}
 		end
 	end
