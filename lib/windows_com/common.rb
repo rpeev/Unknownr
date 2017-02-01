@@ -59,7 +59,15 @@ module WindowsCOM
 		:FAILED,
 		:HRESULT_FROM_WIN32
 
+	module FFIStructMemoryEquality
+		def ==(other)
+			windows_com_memcmp(self, other, self.size) == 0
+		end
+	end
+
 	class GUID < FFI::Struct
+		include FFIStructMemoryEquality
+
 		layout \
 			:Data1, :ulong,
 			:Data2, :ushort,
@@ -81,10 +89,6 @@ module WindowsCOM
 			}
 
 			guid
-		end
-
-		def ==(other)
-			windows_com_memcmp(self, other, self.size) == 0
 		end
 	end
 
