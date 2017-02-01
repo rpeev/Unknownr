@@ -200,9 +200,27 @@ module WindowsCOM
 	end
 
 	class PROPERTYKEY < FFI::Struct
+		include FFIStructMemoryEquality
+
 		layout \
 			:fmtid, GUID,
 			:pid, :ulong
+
+		def self.[](type, index)
+			propkey = new
+
+			propkey[:pid] = type
+
+			guid = propkey[:fmtid]
+			guid[:Data1] = 0x00000000 + index
+			guid[:Data2] = 0x7363
+			guid[:Data3] = 0x696e
+			[0x84, 0x41, 0x79, 0x8a, 0xcf, 0x5a, 0xeb, 0xb7].each_with_index { |part, i|
+				guid[:Data4][i] = part
+			}
+
+			propkey
+		end
 	end
 
 	class PROPVARIANT < FFI::Union

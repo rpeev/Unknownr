@@ -22,6 +22,17 @@ class WindowsCOMTest < Minitest::Test
     refute guid2 == guid3
   end
 
+  def test_PROPERTYKEY
+    propkey1 = PROPERTYKEY[VT_BOOL, 1]
+    propkey2 = PROPERTYKEY[VT_BOOL, 1]
+    propkey3 = PROPERTYKEY[VT_BOOL, 2]
+
+    assert propkey1 == propkey2
+    refute propkey1 != propkey2
+    assert propkey2 != propkey3
+    refute propkey2 == propkey3
+  end
+
   IFoo = COMInterface[nil,
     '00000000-0000-0000-0000-000000000001',
 
