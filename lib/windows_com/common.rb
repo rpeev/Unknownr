@@ -65,32 +65,28 @@ module WindowsCOM
 			:Data2, :ushort,
 			:Data3, :ushort,
 			:Data4, [:uchar, 8]
+
+		def self.[](str)
+			raise 'Bad GUID format' unless str =~ /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i
+
+			guid = new
+
+			guid[:Data1] = str[0, 8].to_i(16)
+			guid[:Data2] = str[9, 4].to_i(16)
+			guid[:Data3] = str[14, 4].to_i(16)
+			guid[:Data4][0] = str[19, 2].to_i(16)
+			guid[:Data4][1] = str[21, 2].to_i(16)
+			str[24, 12].split('').each_slice(2).with_index { |a, i|
+				guid[:Data4][i + 2] = a.join('').to_i(16)
+			}
+
+			guid
+		end
+
+		def ==(other)
+			windows_com_memcmp(self, other, self.size) == 0
+		end
 	end
-
-	def GUIDFromString(str)
-		raise 'Bad GUID format' unless str =~ /^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i
-
-		guid = GUID.new
-
-		guid[:Data1] = str[0, 8].to_i(16)
-		guid[:Data2] = str[9, 4].to_i(16)
-		guid[:Data3] = str[14, 4].to_i(16)
-		guid[:Data4][0] = str[19, 2].to_i(16)
-		guid[:Data4][1] = str[21, 2].to_i(16)
-		str[24, 12].split('').each_slice(2).with_index { |a, i|
-			guid[:Data4][i + 2] = a.join('').to_i(16)
-		}
-
-		guid
-	end
-
-	def GUIDEqual(guid1, guid2)
-		windows_com_memcmp(guid1, guid2, GUID.size) == 0
-	end
-
-	module_function \
-		:GUIDFromString,
-		:GUIDEqual
 
 	class COMVptr_ < FFI::Struct
 		layout \
@@ -124,7 +120,7 @@ module WindowsCOM
 		def self.[](vtbl, siid)
 			Class.new {
 				const_set :Vtbl, vtbl
-				const_set :IID, WindowsCOM::GUIDFromString(siid)
+				const_set :IID, WindowsCOM::GUID[siid]
 
 				def initialize(pointer)
 					@vptr = COMVptr_.new(pointer)
@@ -158,7 +154,7 @@ module WindowsCOM
 	module COMFactory
 		def self.[](iface, sclsid)
 			Class.new(iface) {
-				const_set :CLSID, WindowsCOM::GUIDFromString(sclsid)
+				const_set :CLSID, WindowsCOM::GUID[sclsid]
 
 				def initialize(clsctx = CLSCTX_INPROC)
 					FFI::MemoryPointer.new(:pointer) { |ppv|

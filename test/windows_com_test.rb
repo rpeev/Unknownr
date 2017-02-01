@@ -12,12 +12,14 @@ class WindowsCOMTest < Minitest::Test
   end
 
   def test_GUID
-    guid1 = GUIDFromString('00000000-0000-0000-0000-000000000001')
-    guid2 = GUIDFromString('00000000-0000-0000-0000-000000000001')
-    guid3 = GUIDFromString('00000000-0000-0000-0000-000000000002')
+    guid1 = GUID['00000000-0000-0000-0000-000000000001']
+    guid2 = GUID['00000000-0000-0000-0000-000000000001']
+    guid3 = GUID['00000000-0000-0000-0000-000000000002']
 
-    assert GUIDEqual(guid1, guid2)
-    refute GUIDEqual(guid2, guid3)
+    assert guid1 == guid2
+    refute guid1 != guid2
+    assert guid2 != guid3
+    refute guid2 == guid3
   end
 
   IFoo = COMInterface[nil,
@@ -34,12 +36,12 @@ class WindowsCOMTest < Minitest::Test
 
   def test_COMInterface
     assert_nil IFoo::Vtbl::ParentVtbl
-    assert GUIDEqual(IFoo::IID, GUIDFromString('00000000-0000-0000-0000-000000000001'))
+    assert IFoo::IID == GUID['00000000-0000-0000-0000-000000000001']
     assert IFoo::Vtbl::Spec == {Meth1: [[:pointer], :long]}
     assert IFoo::Vtbl.members == [:Meth1]
 
     assert IBar::Vtbl::ParentVtbl == IFoo::Vtbl
-    assert GUIDEqual(IBar::IID, GUIDFromString('00000000-0000-0000-0000-000000000002'))
+    assert IBar::IID == GUID['00000000-0000-0000-0000-000000000002']
     assert IBar::Vtbl::Spec == {Meth1: [[:pointer], :long], Meth2: [[:pointer], :long]}
     assert IBar::Vtbl.members == [:Meth1, :Meth2]
   end
