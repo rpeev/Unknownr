@@ -138,6 +138,7 @@ module WindowsCOM
 	VT_TYPEMASK = 0xff
 
 	class VARIANT < FFI::Union
+		extend VariantBasicCreation
 		include FFIStructAnonymousAccess
 
 		layout \
@@ -230,6 +231,7 @@ module WindowsCOM
 	end
 
 	class PROPVARIANT < FFI::Union
+		extend VariantBasicCreation
 		include FFIStructAnonymousAccess
 
 		layout \

@@ -87,6 +87,18 @@ module WindowsCOM
 		end
 	end
 
+	# use with extend
+	module VariantBasicCreation
+		def [](type, field, val)
+			var = new
+
+			var[:vt] = type
+			var[field] = val
+
+			var
+		end
+	end
+
 	class GUID < FFI::Struct
 		include FFIStructMemoryEquality
 

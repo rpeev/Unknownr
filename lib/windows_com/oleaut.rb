@@ -33,6 +33,8 @@ module WindowsCOM
 	attach_function :SafeArrayAccessData, [:pointer, :pointer], :long
 	attach_function :SafeArrayUnaccessData, [:pointer], :long
 
+	attach_function :VariantClear, [:pointer], :long
+
 	OLEIVERB_PRIMARY = 0
 	OLEIVERB_SHOW = -1
 	OLEIVERB_OPEN = -2

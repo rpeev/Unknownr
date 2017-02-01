@@ -34,23 +34,34 @@ class WindowsCOMTest < Minitest::Test
   end
 
   def test_FFIStructAnonymousAccess
-    v = VARIANT.new
+    var = VARIANT.new
 
     # direct member access
-    assert v[:decVal].class == DECIMAL
+    assert var[:decVal].class == DECIMAL
 
     # level one _ member access
-    v[:vt] = VT_BOOL
-    assert v[:vt] == VT_BOOL
+    var[:vt] = VT_BOOL
+    assert var[:vt] == VT_BOOL
 
     # level two _ member access
-    v[:intVal] = 42
-    assert v[:intVal] == 42
+    var[:intVal] = 42
+    assert var[:intVal] == 42
 
     # nonexisting field access
     assert_raises(ArgumentError) {
-      v[:foo]
+      var[:foo]
     }
+  end
+
+  def test_VariantBasicCreation
+    var = VARIANT[VT_BOOL, :boolVal, -1]
+    propvar = PROPVARIANT[VT_INT, :intVal, 42]
+
+    assert var[:vt] == VT_BOOL
+    assert var[:boolVal] == -1
+
+    assert propvar[:vt] == VT_INT
+    assert propvar[:intVal] == 42
   end
 
   IFoo = COMInterface[nil,
