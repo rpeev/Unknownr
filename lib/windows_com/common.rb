@@ -184,6 +184,10 @@ module WindowsCOM
 
 				attr_reader :vptr, :vtbl
 
+				def to_ptr
+					@vptr.pointer
+				end
+
 				self::Vtbl.members.each { |name, sig|
 					define_method(name) { |*args|
 						hresult = @vtbl[name].call(@vptr, *args)
