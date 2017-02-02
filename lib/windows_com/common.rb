@@ -1,6 +1,6 @@
 require 'ffi'
 
-WINDOWS_COM_VERSION = '1.0.0'
+WINDOWS_COM_VERSION = '2.0.0'
 
 WINDOWS_COM_OLE_INIT = true unless defined?(WINDOWS_COM_OLE_INIT)
 WINDOWS_COM_TRACE_CALLBACK_REFCOUNT = false unless defined?(WINDOWS_COM_TRACE_CALLBACK_REFCOUNT)
@@ -169,7 +169,7 @@ module WindowsCOM
 				const_set :IID, WindowsCOM::GUID[siid]
 
 				def initialize(pointer)
-					@vptr = COMVptr_.new(pointer)
+					@vptr = WindowsCOM::COMVptr_.new(pointer)
 					@vtbl = self.class::Vtbl.new(@vptr[:lpVtbl])
 				end
 
@@ -202,9 +202,9 @@ module WindowsCOM
 			Class.new(iface) {
 				const_set :CLSID, WindowsCOM::GUID[sclsid]
 
-				def initialize(clsctx = CLSCTX_INPROC)
+				def initialize(clsctx = WindowsCOM::CLSCTX_INPROC)
 					FFI::MemoryPointer.new(:pointer) { |ppv|
-						DetonateHresult(:CoCreateInstance,
+						WindowsCOM::DetonateHresult(:CoCreateInstance,
 							self.class::CLSID, nil, clsctx, self.class::IID, ppv
 						)
 
@@ -228,7 +228,7 @@ module WindowsCOM
 						)
 					}
 
-					@vptr = COMVptr_.new
+					@vptr = WindowsCOM::COMVptr_.new
 					@vptr[:lpVtbl] = @vtbl
 
 					@refc = 0
@@ -238,16 +238,16 @@ module WindowsCOM
 				attr_reader :refc
 
 				def QueryInterface(iid, ppv)
-					unless self.class::IID == iid || IUnknown::IID == iid
+					unless self.class::IID == iid || WindowsCOM::IUnknown::IID == iid
 						STDERR.puts "#{self}.#{__method__} called with unsupported interface id (IID: #{iid})" if $DEBUG
 
 						ppv.write_pointer(0)
-						return E_NOINTERFACE
+						return WindowsCOM::E_NOINTERFACE
 					end
 
 					ppv.write_pointer(@vptr)
 					AddRef()
-					S_OK
+					WindowsCOM::S_OK
 				end
 
 				def AddRef
@@ -255,6 +255,8 @@ module WindowsCOM
 
 					STDERR.puts "#{self}.#{__method__} (@refc: #{@refc})" if
 						$DEBUG || WINDOWS_COM_TRACE_CALLBACK_REFCOUNT
+
+					@refc
 				end
 
 				def Release
@@ -270,11 +272,13 @@ module WindowsCOM
 						STDERR.puts "#{self} refcount is 0, #{@vtbl} and #{@vptr} freed" if
 							$DEBUG || WINDOWS_COM_TRACE_CALLBACK_REFCOUNT
 					end
+
+					@refc
 				end
 
-				(self::Vtbl.members - IUnknown::Vtbl.members).each { |name|
+				(self::Vtbl.members - WindowsCOM::IUnknown::Vtbl.members).each { |name|
 					define_method(name) { |*args|
-						E_NOTIMPL
+						WindowsCOM::E_NOTIMPL
 					}
 				}
 			}
