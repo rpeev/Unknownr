@@ -8,6 +8,14 @@ WINDOWS_COM_TRACE_CALLBACK_REFCOUNT = false unless defined?(WINDOWS_COM_TRACE_CA
 module WindowsCOM
 	extend FFI::Library
 
+	def UsingCOMObjects(*objs)
+		yield(*objs)
+	ensure
+		objs.each { |obj|
+			obj.Release
+		}
+	end
+
 	def DetonateHresult(name, *args)
 		hresult = send(name, *args)
 		failed = FAILED(hresult)
@@ -19,7 +27,48 @@ module WindowsCOM
 		yield hresult if failed && block_given?
 	end
 
+	module FFIStructMemoryEquality
+		def ==(other)
+			WindowsCOM.windows_com_memcmp(self, other, self.size) == 0
+		end
+	end
+
+	module FFIStructAnonymousAccess
+		def [](k)
+			if members.include?(k)
+				super
+			elsif self[:_].members.include?(k)
+				self[:_][k]
+			else
+				self[:_][:_][k]
+			end
+		end
+
+		def []=(k, v)
+			if members.include?(k)
+				super
+			elsif self[:_].members.include?(k)
+				self[:_][k] = v
+			else
+				self[:_][:_][k] = v
+			end
+		end
+	end
+
+	# use with extend
+	module VariantBasicCreation
+		def [](type, field, val)
+			var = new
+
+			var[:vt] = type
+			var[field] = val
+
+			var
+		end
+	end
+
 	module_function \
+		:UsingCOMObjects,
 		:DetonateHresult
 
 	S_OK = 0
@@ -59,46 +108,6 @@ module WindowsCOM
 		:SUCCEEDED,
 		:FAILED,
 		:HRESULT_FROM_WIN32
-
-	module FFIStructMemoryEquality
-		def ==(other)
-			windows_com_memcmp(self, other, self.size) == 0
-		end
-	end
-
-	module FFIStructAnonymousAccess
-		def [](k)
-			if members.include?(k)
-				super
-			elsif self[:_].members.include?(k)
-				self[:_][k]
-			else
-				self[:_][:_][k]
-			end
-		end
-
-		def []=(k, v)
-			if members.include?(k)
-				super
-			elsif self[:_].members.include?(k)
-				self[:_][k] = v
-			else
-				self[:_][:_][k] = v
-			end
-		end
-	end
-
-	# use with extend
-	module VariantBasicCreation
-		def [](type, field, val)
-			var = new
-
-			var[:vt] = type
-			var[field] = val
-
-			var
-		end
-	end
 
 	class GUID < FFI::Struct
 		include FFIStructMemoryEquality

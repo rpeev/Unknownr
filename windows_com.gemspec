@@ -16,11 +16,12 @@ Gem::Specification.new do |spec|
 
   spec.files = FileList[
     'LICENSE',
-    'README.md',
+    'README.md', 'screenshot.png',
     'RELNOTES.md',
     'lib/windows_com.rb',
     'lib/windows_com/*.rb',
-    'examples/*.*'
+    'examples/*.*',
+    'examples/UIRibbon/*.*'
   ]
   spec.require_paths = ['lib']
   spec.add_runtime_dependency('ffi', '~> 1')

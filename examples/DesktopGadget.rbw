@@ -10,12 +10,8 @@ IDesktopGadget = COMInterface[IUnknown,
 
 DesktopGadget = COMFactory[IDesktopGadget, '924ccc1b-6562-4c85-8657-d177925222b6']
 
-dg = DesktopGadget.new
-
-begin
+UsingCOMObjects(DesktopGadget.new) { |dg|
 	dg.RunGadget(
-		"#{ENV['ProgramFiles']}\\Windows Sidebar\\Gadgets\\Clock.Gadget\0".encode('utf-16le')
+		"#{ENV['ProgramFiles']}\\Windows Sidebar\\Gadgets\\Clock.Gadget\0".encode!('utf-16le')
 	)
-ensure
-	dg.Release
-end
+}

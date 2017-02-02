@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2.0.0
+
+- Add COMCallback module for implementing COM objects on the Ruby/FFI side
+- enhance some bound FFI structs with useful methods
+- improve code
+
 ## 1.0.0
 
 Rename library to windows_com and ensure it works with recent ruby
