@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.0.1
+
+Allow COMInterface_ instances to be passed to code expecting pointers without calling #vptr
+
 ## 2.0.0
 
 - Add COMCallback module for implementing COM objects on the Ruby/FFI side
