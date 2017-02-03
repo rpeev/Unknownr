@@ -14,7 +14,7 @@ Allow `COMInterface_` instances to be passed to code expecting pointers without 
 
 ## 2.0.0
 
-- Add `COMCallback` module for __implementing__ COM objects in Ruby
+- Add `COMCallback` module for __implementing__ COM interfaces in Ruby
 - enhance some bound FFI structs with useful methods
 - improve code
 
