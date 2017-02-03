@@ -1,6 +1,6 @@
 require 'ffi'
 
-WINDOWS_COM_VERSION = '2.0.1'
+WINDOWS_COM_VERSION = '2.0.2'
 
 WINDOWS_COM_OLE_INIT = true unless defined?(WINDOWS_COM_OLE_INIT)
 
