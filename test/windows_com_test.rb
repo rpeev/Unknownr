@@ -81,12 +81,12 @@ class WindowsCOMTest < Minitest::Test
   def test_COMInterface
     assert_nil IFoo::Vtbl::ParentVtbl
     assert IFoo::IID == GUID['00000000-0000-0000-0000-000000000001']
-    assert IFoo::Vtbl::Spec == {Meth1: [[:pointer], :long]}
+    assert IFoo::Vtbl::Spec == {Meth1: [[], :long]}
     assert IFoo::Vtbl.members == [:Meth1]
 
     assert IBar::Vtbl::ParentVtbl == IFoo::Vtbl
     assert IBar::IID == GUID['00000000-0000-0000-0000-000000000002']
-    assert IBar::Vtbl::Spec == {Meth1: [[:pointer], :long], Meth2: [[:pointer], :long]}
+    assert IBar::Vtbl::Spec == {Meth1: [[], :long], Meth2: [[], :long]}
     assert IBar::Vtbl.members == [:Meth1, :Meth2]
   end
 end
