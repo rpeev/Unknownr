@@ -3,7 +3,9 @@ require 'ffi'
 WINDOWS_COM_VERSION = '2.0.1'
 
 WINDOWS_COM_OLE_INIT = true unless defined?(WINDOWS_COM_OLE_INIT)
+
 WINDOWS_COM_TRACE_CALLBACK_REFCOUNT = false unless defined?(WINDOWS_COM_TRACE_CALLBACK_REFCOUNT)
+WINDOWS_COM_TRACE_CALL_ARGS = false unless defined?(WINDOWS_COM_TRACE_CALL_ARGS)
 
 module WindowsCOM
 	extend FFI::Library
@@ -17,7 +19,7 @@ module WindowsCOM
 	end
 
 	def DetonateHresult(name, *args)
-		hresult = send(name, *args)
+		hresult = __send__(name, *args)
 		failed = FAILED(hresult)
 
 		raise "#{name} failed (hresult: #{format('%#08x', hresult)})" if failed
@@ -151,7 +153,7 @@ module WindowsCOM
 	module COMVtbl_
 		def self.[](parent_vtbl, spec)
 			spec.each { |name, sig|
-				sig[0].unshift(:pointer) # prepend *this* pointer to FFI func signature
+				sig[0].unshift(:pointer) # prepend *this* to FFI func signature
 			}
 
 			Class.new(FFI::Struct) {
@@ -190,12 +192,12 @@ module WindowsCOM
 
 				self::Vtbl.members.each { |name, sig|
 					define_method(name) { |*args|
-						hresult = @vtbl[name].call(@vptr, *args)
+						args.unshift(@vptr) # prepend *this* for Vtbl meth call
 
-						raise "#{self}.#{name} failed (hresult: #{format('%#08x', hresult)})" if
-							WindowsCOM::FAILED(hresult)
+						STDERR.puts [:vt_call, self.class, name, args].inspect if
+							WINDOWS_COM_TRACE_CALL_ARGS
 
-						hresult
+						@vtbl[name].call(*args)
 					}
 				}
 			}
@@ -234,9 +236,16 @@ module WindowsCOM
 				def initialize
 					@vtbl = self.class::Vtbl.new
 					@vtbl.members.each { |name|
+						params, ret = @vtbl.class::Spec[name]
+
 						@vtbl[name] = instance_variable_set("@__ffi_func__#{name}",
-							FFI::Function.new(*@vtbl.class::Spec[name].reverse, convention: :stdcall) { |*args|
-								__send__(name, *args[1..-1]) # remove *this* pointer from Ruby meth call
+							FFI::Function.new(ret, params, convention: :stdcall) { |*args|
+								args.shift # remove *this* for Ruby meth call
+
+								STDERR.puts [:rb_call, self.class, name, args].inspect if
+									WINDOWS_COM_TRACE_CALL_ARGS
+
+								__send__(name, *args)
 							}
 						)
 					}
@@ -282,7 +291,7 @@ module WindowsCOM
 						@vtbl.pointer.free
 						@vptr.pointer.free
 
-						STDERR.puts "#{self} refcount is 0, #{@vtbl} and #{@vptr} freed" if
+						STDERR.puts "#{self}.@#{@vtbl} freed\n#{self}.@#{@vptr} freed" if
 							$DEBUG || WINDOWS_COM_TRACE_CALLBACK_REFCOUNT
 					end
 

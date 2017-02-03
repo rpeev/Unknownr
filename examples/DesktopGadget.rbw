@@ -1,3 +1,5 @@
+#WINDOWS_COM_TRACE_CALL_ARGS = true
+
 require 'windows_com'
 
 include WindowsCOM
