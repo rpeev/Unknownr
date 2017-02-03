@@ -152,10 +152,15 @@ module WindowsCOM
 
 	module COMVtbl_
 		def self.[](parent_vtbl, spec)
-			spec.each { |name, sig|
-				sig[0].unshift(:pointer) # prepend *this* to FFI func signature
-			}
+=begin
+	IUnknown::Vtbl::Spec example (*this* ptr is NOT included in spec signature):
 
+	{
+		QueryInterface: [[:pointer, :pointer], :long],
+		AddRef: [[], :ulong],
+		Release: [[], :ulong]
+	}
+=end
 			Class.new(FFI::Struct) {
 				const_set :ParentVtbl, parent_vtbl
 
@@ -165,7 +170,9 @@ module WindowsCOM
 
 				layout_args = self::Spec.map { |name, sig|
 					params, ret = sig
-					[name, callback(params, ret)]
+					ffi_params = [:pointer, *params] # prepend *this* ptr to FFI func signature
+
+					[name, callback(ffi_params, ret)]
 				}
 				layout_args.flatten!
 				layout(*layout_args)
@@ -192,7 +199,7 @@ module WindowsCOM
 
 				self::Vtbl.members.each { |name, sig|
 					define_method(name) { |*args|
-						args.unshift(@vptr) # prepend *this* for Vtbl meth call
+						args.unshift(@vptr) # prepend *this* ptr for FFI func call
 
 						STDERR.puts [:vt_call, self.class, name, args].inspect if
 							WINDOWS_COM_TRACE_CALL_ARGS
@@ -237,10 +244,11 @@ module WindowsCOM
 					@vtbl = self.class::Vtbl.new
 					@vtbl.members.each { |name|
 						params, ret = @vtbl.class::Spec[name]
+						ffi_params = [:pointer, *params] # prepend *this* ptr to FFI func signature
 
 						@vtbl[name] = instance_variable_set("@__ffi_func__#{name}",
-							FFI::Function.new(ret, params, convention: :stdcall) { |*args|
-								args.shift # remove *this* for Ruby meth call
+							FFI::Function.new(ret, ffi_params, convention: :stdcall) { |*args|
+								args.shift # remove *this* ptr for Ruby meth call
 
 								STDERR.puts [:rb_call, self.class, name, args].inspect if
 									WINDOWS_COM_TRACE_CALL_ARGS
