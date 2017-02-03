@@ -2,7 +2,7 @@
 
 ## 2.0.2
 
-Implement the ability to trace COM call arguments (set WINDOWS_COM_TRACE_CALL_ARGS)
+Implement the ability to trace COM call arguments (set `WINDOWS_COM_TRACE_CALL_ARGS`)
 
 ## 2.0.1
 
