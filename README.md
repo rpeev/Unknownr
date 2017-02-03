@@ -45,7 +45,6 @@ end
 - transparent interop with code expecting COM interface pointers
 
 ```ruby
-# uia is an instance of UIA, a child class of IUIApplicationImpl
 uif.Initialize(hwnd, uia)
 ```
 
