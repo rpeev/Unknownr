@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
     'lib/windows_com.rb',
     'lib/windows_com/*.rb',
     'examples/*.*',
+    'examples/res/*.*',
     'examples/UIRibbon/*.*'
   ]
   spec.require_paths = ['lib']

@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.1.1
+
+Sync important example with changes in related gem (windows_gui)
+
 ## 2.1.0
 
 `COMVtbl_` doesn't prepend `this` pointers to vtbl specs
