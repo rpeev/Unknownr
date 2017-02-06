@@ -9,6 +9,22 @@ Ruby FFI (x86) bindings to essential COM related Windows APIs
 - convenient DSL for binding COM interface definitions
 
 ```ruby
+IUIFramework = COMInterface[IUnknown,
+  'F4F0385D-6872-43a8-AD09-4C339CB3F5C5',
+
+  Initialize: [[:pointer, :pointer], :long],
+  Destroy: [[], :long],
+  LoadUI: [[:pointer, :buffer_in], :long],
+  GetView: [[:uint, :pointer, :pointer], :long],
+  GetUICommandProperty: [[:uint, :pointer, :pointer], :long],
+  SetUICommandProperty: [[:uint, :pointer, :pointer], :long],
+  InvalidateUICommand: [[:uint, :int, :pointer], :long],
+  FlushPendingInvalidations: [[], :long],
+  SetModes: [[:int], :long]
+]
+
+UIFramework = COMFactory[IUIFramework, '926749fa-2615-4987-8845-c33e65f2b957']
+
 IUIApplication = COMInterface[IUnknown,
   'D428903C-729A-491d-910D-682A08FF2522',
 
