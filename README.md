@@ -40,7 +40,8 @@ IUIApplicationImpl = COMCallback[IUIApplication]
 
 ```ruby
 class UIA < IUIApplicationImpl
-  def initialize(uich) # uich is an instance of IUICommandHandlerImpl
+  # uich is an instance of IUICommandHandlerImpl subclass (bindings and definition omitted for brevity)
+  def initialize(uich)
     @uich = uich
 
     super() # wire COM stuff
@@ -56,12 +57,15 @@ class UIA < IUIApplicationImpl
     S_OK
   end
 end
+
+uif = UIFramework.new # system COM object implementing the IUIFramework interface
+uia = UIA.new(uich) # Ruby COM object implementing the IUIApplication interface
 ```
 
 - transparent interop with code expecting COM interface pointers
 
 ```ruby
-uif.Initialize(hwnd, uia) # uif and uia are instances of UIFramework and IUIApplicationImpl respectively
+uif.Initialize(hwnd, uia)
 ```
 
 ## Conventions
