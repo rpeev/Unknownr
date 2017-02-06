@@ -70,7 +70,7 @@ uif.Initialize(hwnd, uia)
 
 ## Conventions
 
-Classes starting with capital __I__ are wrappers around __raw COM interface pointers__ inheriting from `COMInterface_` (e.g. `IUIApplication`). They contain `COMVptr_` and `COMVtbl_` (`FFI::Struct` implementations) instances wired to the corresponding COM interface implementation function pointers and are (usually) not directly instantiated by application code.
+Classes starting with capital __I__ are wrappers around __raw COM interface pointers__ inheriting from `COMInterface_` (e.g. `IUIApplication`). They contain `COMVptr_` and `COMVtbl_` (`FFI::Struct` implementations) instances wired to the corresponding COM interface implementation base and virtual table pointers and are (usually) not directly instantiated by application code.
 
 Classes __not__ starting with capital __I__ are __COM factories__ (obtain COM interface implementations using `CoCreateInstance`) inheriting from the corresponding COM interface class (e.g. `UIFramework` is a factory for creating instances of `IUIFramework`). They are directly instantiated by application code and create system COM objects implementing the corresponding interface.
 
