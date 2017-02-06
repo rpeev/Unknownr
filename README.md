@@ -76,7 +76,7 @@ Classes __not__ starting with capital __I__ are __COM factories__ (obtain COM in
 
 Classes starting with capital __I__ and ending with __Impl__ are __COM callbacks__ inheriting from the corresponding COM interface class (e.g. `IUIApplicationImpl` is a base class for implementing the `IUIApplication` interface in Ruby). They are usually subclassed, implement (some) of the corresponding COM interface methods and then instantiated by application code.
 
-All kinds of classes can be freely subclassed and used regardles of their COM duties (just don't forget to call __super__ appropriately in the subclass `#initialize` method). `COMInterface_` (their common base) implements `#to_ptr` (returning the corresponding `COMVptr_` instance pointer), so the instances can be directly passed to code expecting COM interface pointers. In a scenario where the COM stuff is used as instance variables of some other class, but it is desirable for the class instances to be passed transparently to code expecting COM interface pointers, just define `#to_ptr` calling the appropriate COM object `#to_ptr`.
+All kinds of classes can be freely subclassed and used regardless of their COM duties (just don't forget to call __super__ appropriately in the subclass `#initialize` method). `COMInterface_` (their common base) implements `#to_ptr` (returning the corresponding `COMVptr_` instance pointer), so the instances can be directly passed to code expecting COM interface pointers. In a scenario where the COM stuff is used as instance variables of some other class, but it is desirable for the class instances to be passed transparently to code expecting COM interface pointers, just define `#to_ptr` calling the appropriate COM object `#to_ptr`.
 
 ## Install
 
